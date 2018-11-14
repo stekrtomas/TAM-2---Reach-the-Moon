@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Raketka</string>
+    <string name="play">Play</string>
+    <string name="buttonSelect">Select player</string>
+    <string name="buttonScore">High score</string>
+    <string name="buttonClose">Close APP</string>
 </resources>
