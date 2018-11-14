@@ -1,8 +1,6 @@
 package com.example.student.raketka;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,14 +12,16 @@ import android.view.SurfaceView;
 
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
+    private final String playerName;
     private GameThread gameThread;
     private Rocket rocket;
 
 
     private Point resolution;
 
-    public GameSurface(Context context)  {
+    public GameSurface(Context context, String name) {
         super(context);
+        this.playerName = name;
 
         // Make Game Surface focusable so it can handle events. .
         this.setFocusable(true);
@@ -50,10 +50,14 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 
         // draw
-        Paint myPaint = new Paint();
-        myPaint.setColor(Color.rgb(255, 0, 0));
-        myPaint.setStrokeWidth(10);
-        canvas.drawRect(100, 100, 200, 200, myPaint);
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawPaint(paint);
+
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(20);
+        canvas.drawText(playerName, 10, 25, paint);
 
 
         rocket.draw(canvas);
