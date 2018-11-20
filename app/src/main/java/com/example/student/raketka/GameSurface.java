@@ -13,15 +13,17 @@ import android.view.SurfaceView;
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     private final String playerName;
+    private final Controller controller;
     private GameThread gameThread;
     private Rocket rocket;
 
 
     private Point resolution;
 
-    public GameSurface(Context context, String name) {
+    public GameSurface(Context context, String name, Controller controller) {
         super(context);
         this.playerName = name;
+        this.controller = controller;
 
         // Make Game Surface focusable so it can handle events. .
         this.setFocusable(true);
@@ -31,7 +33,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void update()  {
-
+        float rocketAngle = controller.getAngle();
+        rocket.Move(rocketAngle);
     }
 
     public Point getResolution() {
