@@ -26,22 +26,17 @@ public class Rocket {
 
         canvas.drawBitmap(rocket, position.x, position.y, null);
 
-       /* Paint myPaint = new Paint();
-        myPaint.setColor(Color.rgb(69, 69, 69));
-        canvas.drawRect(position.x, position.y, position.x + 100, position.y + 100, myPaint);*/
     }
 
 
     public void Move(float rocketAngle) {
-        if (rocketAngle > 30) {
+        if (rocketAngle > 10) {
             if (position.x < gs.getResolution().x - imgResolution.x)
                 position.x += 11;
-        } else if (rocketAngle < -30) {
+        } else if (rocketAngle < -10) {
             if (position.x > 0)
                 position.x -= 11;
         }
-        /*else if(Math.abs(rocketAngle) < 10) {
-            getWindow().getDecorView().setBackgroundColor(Color.WHITE);
-        }*/
+
     }
 }

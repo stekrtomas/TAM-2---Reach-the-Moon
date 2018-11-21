@@ -16,6 +16,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     private final Controller controller;
     private GameThread gameThread;
     private Rocket rocket;
+    private Enemy enemy;
 
 
     private Point resolution;
@@ -35,6 +36,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     public void update()  {
         float rocketAngle = controller.getAngle();
         rocket.Move(rocketAngle);
+        enemy.Move();
     }
 
     public Point getResolution() {
@@ -64,6 +66,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
 
         rocket.draw(canvas);
+        enemy.draw(canvas);
     }
 
     // Implements method of SurfaceHolder.Callback
@@ -75,6 +78,7 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         this.gameThread.start();
 
         rocket = new Rocket(this);
+        enemy = new Enemy(this);
     }
 
     // Implements method of SurfaceHolder.Callback
