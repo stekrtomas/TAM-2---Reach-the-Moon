@@ -99,7 +99,6 @@ public class Rocket {
     }
 
     public void GameOver() {
-        score = 0;
-        fuel = 0;
+
     }
 }

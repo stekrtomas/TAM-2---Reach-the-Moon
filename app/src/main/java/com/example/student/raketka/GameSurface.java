@@ -1,7 +1,9 @@
 package com.example.student.raketka;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -9,6 +11,7 @@ import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,8 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     private Point resolution;
 
+    public FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(getContext());
+
     public GameSurface(Context context, String name, Controller controller) {
         super(context);
         this.playerName = name;
@@ -65,7 +70,6 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
             enemy.Move();
             if (rocket.collideEnemy(enemy)) {
                 if (gameOver) {
-                    rocket.GameOver();
                     this.GameOver();
                     gameOver = false;
                 }
@@ -148,6 +152,20 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     private void GameOver() {
         mp2.stop();
+        // Gets the data repository in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_NAME, this.playerName);
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_SCORE, rocket.getScore());
+
+        // Insert the new row, returning the primary key value of the new row
+        if (db.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values) < 0) {
+            Toast.makeText(getContext(), "chyba", Toast.LENGTH_LONG).show();
+        }
+
+
         Intent intent = new Intent(getContext(), HighScore.class);
         intent.putExtra("playerName", playerName);
         intent.putExtra("playerScore", rocket.getScore());
