@@ -9,23 +9,22 @@ import android.graphics.RectF;
 
 import java.util.Random;
 
-public class Enemy {
-
+public class Fuel {
     private PointF position;
     private GameSurface gs;
-    private Bitmap enemy;
+    private Bitmap fuel;
     private Point imgResolution;
-    private int speed;
     private RectF collisionBox;
+    private int speed;
     private Random random;
 
 
-    public Enemy(GameSurface gs) {
+    public Fuel(GameSurface gs) {
         this.gs = gs;
-        enemy = BitmapFactory.decodeResource(gs.getResources(), R.drawable.meteor);
         random = new Random();
         speed = 5;
-        imgResolution = new Point(enemy.getWidth(), enemy.getHeight());
+        fuel = BitmapFactory.decodeResource(gs.getResources(), R.drawable.fuel);
+        imgResolution = new Point(fuel.getWidth(), fuel.getHeight());
         position = new PointF(random.nextInt(gs.getResolution().x - imgResolution.x), 0 - imgResolution.y);
         collisionBox = new RectF(position.x, position.y, position.x + imgResolution.x, position.y + imgResolution.y);
     }
@@ -35,14 +34,16 @@ public class Enemy {
         Paint myPaint = new Paint();
         myPaint.setColor(Color.rgb(69, 69, 69));
         myPaint.setStrokeWidth(10);
-        canvas.drawRect(collisionBox, myPaint);*/
-        canvas.drawBitmap(enemy, position.x, position.y, null);
+        canvas.drawRect(collisionBox, myPaint);
+        */
+
+        canvas.drawBitmap(fuel, position.x, position.y, null);
 
     }
 
+
     public void Move() {
         position.y += speed;
-
         collisionBox.top = position.y;
         collisionBox.bottom = position.y + imgResolution.y;
         collisionBox.left = position.x;
@@ -56,4 +57,5 @@ public class Enemy {
     public RectF getCollisionBox() {
         return this.collisionBox;
     }
+
 }

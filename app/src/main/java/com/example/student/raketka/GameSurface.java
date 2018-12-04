@@ -1,13 +1,17 @@
 package com.example.student.raketka;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.media.MediaPlayer;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
@@ -16,8 +20,23 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     private final Controller controller;
     private GameThread gameThread;
     private Rocket rocket;
-    private Enemy enemy;
+    //private Enemy enemy;
+    //private Fuel fuel;
+    private int counter;
 
+    private final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.fuel);
+    private final MediaPlayer mp2 = MediaPlayer.create(getContext(), R.raw.mcmc);
+
+    boolean addEnemy1;
+    boolean addEnemy2;
+    boolean addEnemy3;
+    boolean addEnemy4;
+
+    boolean gameOver = true;
+
+
+    public List<Enemy> enemies = new ArrayList<>();
+    public List<Fuel> fuels = new ArrayList<>();
 
     private Point resolution;
 
@@ -36,7 +55,103 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     public void update()  {
         float rocketAngle = controller.getAngle();
         rocket.Move(rocketAngle);
-        enemy.Move();
+        ArrayList<Enemy> toRemove = new ArrayList<>();
+        ArrayList<Fuel> toRemoveFuel = new ArrayList<>();
+        //enemy.Move();
+        //fuel.Move();
+
+
+        for (Enemy enemy : enemies) {
+            enemy.Move();
+            if (rocket.collideEnemy(enemy)) {
+                if (gameOver) {
+                    rocket.GameOver();
+                    this.GameOver();
+                    gameOver = false;
+                }
+
+                toRemove.add(enemy);
+            }
+            if (enemy.getPosition().y > this.resolution.y) {
+                toRemove.add(enemy);
+            }
+        }
+
+
+        for (Fuel fuel : fuels) {
+            fuel.Move();
+            if (rocket.collideFuel(fuel)) {
+                rocket.addFuel();
+                mp.start();
+                toRemoveFuel.add(fuel);
+            }
+            if (fuel.getPosition().y > this.resolution.y) {
+                toRemoveFuel.add(fuel);
+            }
+        }
+
+        //add enemies
+        for (int i = 0; i < toRemove.size(); i++) {
+            enemies.add(new Enemy(this));
+        }
+
+        //add fuels
+        for (int i = 0; i < toRemoveFuel.size(); i++) {
+            fuels.add(new Fuel(this));
+        }
+
+        enemies.removeAll(toRemove);
+        fuels.removeAll(toRemoveFuel);
+
+        rocket.addScore();
+        counter++;
+
+        if (rocket.getScore() > 1000 && rocket.getScore() < 1999) {
+            if (addEnemy1) {
+                addEnemy1 = false;
+                enemies.add(new Enemy(this));
+            }
+        }
+        if (rocket.getScore() > 2000 && rocket.getScore() < 2999) {
+            if (addEnemy2) {
+                addEnemy2 = false;
+                enemies.add(new Enemy(this));
+            }
+        }
+        if (rocket.getScore() > 3000 && rocket.getScore() < 3999) {
+            if (addEnemy3) {
+                addEnemy3 = false;
+                enemies.add(new Enemy(this));
+            }
+        }
+        if (rocket.getScore() > 4000) {
+            if (addEnemy4) {
+                addEnemy4 = false;
+                enemies.add(new Enemy(this));
+            }
+        }
+
+        if (counter > 100) {
+            counter = 0;
+
+            rocket.useFuel();
+        }
+
+        if (rocket.getFuel() == 0) {
+            if (gameOver) {
+                this.GameOver();
+                gameOver = false;
+            }
+        }
+
+    }
+
+    private void GameOver() {
+        mp2.stop();
+        Intent intent = new Intent(getContext(), HighScore.class);
+        intent.putExtra("playerName", playerName);
+        intent.putExtra("playerScore", rocket.getScore());
+        getContext().startActivity(intent);
     }
 
     public Point getResolution() {
@@ -61,12 +176,20 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         canvas.drawPaint(paint);
 
         paint.setColor(Color.BLACK);
-        paint.setTextSize(20);
-        canvas.drawText(playerName, 10, 25, paint);
+        paint.setTextSize(25);
+        canvas.drawText("Player: " + playerName + ",Score:  " + rocket.getScore() + " ,Fuel: " + rocket.getFuel(), 10, 25, paint);
 
 
         rocket.draw(canvas);
-        enemy.draw(canvas);
+        for (Enemy enemy : enemies) {
+            enemy.draw(canvas);
+        }
+        for (Fuel fuel : fuels) {
+            fuel.draw(canvas);
+        }
+
+        //enemy.draw(canvas);
+        //fuel.draw(canvas);
     }
 
     // Implements method of SurfaceHolder.Callback
@@ -77,8 +200,20 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         this.gameThread.setRunning(true);
         this.gameThread.start();
 
+        counter = 0;
+        addEnemy1 = true;
+        addEnemy2 = true;
+        addEnemy3 = true;
+        addEnemy4 = true;
+
+        mp2.start();
+
+
         rocket = new Rocket(this);
-        enemy = new Enemy(this);
+        //enemy = new Enemy(this);
+        enemies.add(new Enemy(this));
+        fuels.add(new Fuel(this));
+        //fuel = new Fuel(this);
     }
 
     // Implements method of SurfaceHolder.Callback
