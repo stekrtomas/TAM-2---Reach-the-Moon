@@ -19,7 +19,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".HighScore"></activity>
-        <activity android:name=".GameActivity" />
+        <activity
+            android:name=".GameActivity"
+            android:theme="@style/Theme.AppCompat" />
     </application>
 
 </manifest>

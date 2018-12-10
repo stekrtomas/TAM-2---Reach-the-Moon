@@ -56,17 +56,19 @@ public class HighScore extends Activity {
         while (cursor.moveToNext())
 
         {
-            long itemId = cursor.getLong(
-                    cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry._ID));
-            String name = cursor.getString(
-                    cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_NAME));
-            int score = cursor.getInt(
-                    cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_SCORE));
-            itemIds.add(score);
+            if (i <= 10) {
+                long itemId = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry._ID));
+                String name = cursor.getString(
+                        cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_NAME));
+                int score = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(FeedReaderContract.FeedEntry.COLUMN_NAME_SCORE));
+                itemIds.add(score);
 
-            //Toast.makeText(this,name + " " + score,Toast.LENGTH_LONG).show();
-            text.append(i + " : \t" + name + " :\t " + score + "\n");
-            i++;
+                //Toast.makeText(this,name + " " + score,Toast.LENGTH_LONG).show();
+                text.append(i + " : \t" + name + " :\t " + score + "\n");
+                i++;
+            }
 
         }
         cursor.close();

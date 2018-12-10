@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
     }
 
     public void StartGame(View view) {
-        Toast.makeText(getApplicationContext(), "Play Game!!!", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Play Game!!!", Toast.LENGTH_SHORT).show();
         String name = ((EditText) findViewById(R.id.playerName)).getText().toString();
 
         Intent intent = new Intent(MainActivity.this, GameActivity.class);
@@ -34,7 +34,7 @@ public class MainActivity extends Activity {
     }
 
     public void ShowHighScore(View view) {
-        Toast.makeText(getApplicationContext(), "High Score!", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "High Score!", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(MainActivity.this, HighScore.class));
     }
 }

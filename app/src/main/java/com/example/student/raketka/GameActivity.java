@@ -1,18 +1,18 @@
 package com.example.student.raketka;
 
-import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-
-public class GameActivity extends Activity {
+public class GameActivity extends AppCompatActivity {
 
     private SensorManager sensorManager;
     private SensorEventListener rvListener;
@@ -30,7 +30,7 @@ public class GameActivity extends Activity {
             Toast.makeText(this, "Device have no Gyroscope", Toast.LENGTH_SHORT).show();
             //finish();
         } else {
-            Toast.makeText(this, "Device have Gyroscope. It is OK.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Device have Gyroscope. It is OK.", Toast.LENGTH_SHORT).show();
 
         }
 
@@ -76,8 +76,8 @@ public class GameActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         String playerName = this.getIntent().getStringExtra("playerName");
 
-
-        setContentView(new GameSurface(getApplicationContext(), playerName, controller));
+        GameViewModel model = ViewModelProviders.of(this).get(GameViewModel.class);
+        setContentView(new GameSurface(getApplicationContext(), playerName, controller, model));
     }
 
 }

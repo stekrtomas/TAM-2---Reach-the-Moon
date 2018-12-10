@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,42 +16,28 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
     private final String playerName;
     private final Controller controller;
+    private final GameViewModel model;
     private GameThread gameThread;
-    private Rocket rocket;
-    //private Enemy enemy;
-    //private Fuel fuel;
-    private int counter;
+    private Bitmap mBackground = BitmapFactory.decodeResource(getResources(), R.drawable.background);
 
     private final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.fuel);
-    private final MediaPlayer mp2 = MediaPlayer.create(getContext(), R.raw.mcmc);
 
-    boolean addEnemy1;
-    boolean addEnemy2;
-    boolean addEnemy3;
-    boolean addEnemy4;
-
-    boolean gameOver = true;
-
-
-    public List<Enemy> enemies = new ArrayList<>();
-    public List<Fuel> fuels = new ArrayList<>();
 
     private Point resolution;
 
     public FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(getContext());
 
-    public GameSurface(Context context, String name, Controller controller) {
+    public GameSurface(Context context, String name, Controller controller, GameViewModel model) {
         super(context);
         this.playerName = name;
         this.controller = controller;
-
+        this.model = model;
         // Make Game Surface focusable so it can handle events. .
         this.setFocusable(true);
 
@@ -57,21 +45,21 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         this.getHolder().addCallback(this);
     }
 
-    public void update()  {
+    public void update() {
         float rocketAngle = controller.getAngle();
-        rocket.Move(rocketAngle);
+        model.rocket.Move(rocketAngle);
         ArrayList<Enemy> toRemove = new ArrayList<>();
         ArrayList<Fuel> toRemoveFuel = new ArrayList<>();
         //enemy.Move();
         //fuel.Move();
 
 
-        for (Enemy enemy : enemies) {
+        for (Enemy enemy : model.enemies) {
             enemy.Move();
-            if (rocket.collideEnemy(enemy)) {
-                if (gameOver) {
+            if (model.rocket.collideEnemy(enemy)) {
+                if (model.gameOver) {
                     this.GameOver();
-                    gameOver = false;
+                    model.gameOver = false;
                 }
 
                 toRemove.add(enemy);
@@ -82,10 +70,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         }
 
 
-        for (Fuel fuel : fuels) {
+        for (Fuel fuel : model.fuels) {
             fuel.Move();
-            if (rocket.collideFuel(fuel)) {
-                rocket.addFuel();
+            if (model.rocket.collideFuel(fuel)) {
+                model.rocket.addFuel();
                 mp.start();
                 toRemoveFuel.add(fuel);
             }
@@ -96,69 +84,69 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
 
         //add enemies
         for (int i = 0; i < toRemove.size(); i++) {
-            enemies.add(new Enemy(this));
+            model.enemies.add(new Enemy(this));
         }
 
         //add fuels
         for (int i = 0; i < toRemoveFuel.size(); i++) {
-            fuels.add(new Fuel(this));
+            model.fuels.add(new Fuel(this));
         }
 
-        enemies.removeAll(toRemove);
-        fuels.removeAll(toRemoveFuel);
+        model.enemies.removeAll(toRemove);
+        model.fuels.removeAll(toRemoveFuel);
 
-        rocket.addScore();
-        counter++;
+        model.rocket.addScore();
+        model.counter++;
 
-        if (rocket.getScore() > 1000 && rocket.getScore() < 1999) {
-            if (addEnemy1) {
-                addEnemy1 = false;
-                enemies.add(new Enemy(this));
+        if (model.rocket.getScore() > 1000 && model.rocket.getScore() < 1999) {
+            if (model.addEnemy1) {
+                model.addEnemy1 = false;
+                model.enemies.add(new Enemy(this));
             }
         }
-        if (rocket.getScore() > 2000 && rocket.getScore() < 2999) {
-            if (addEnemy2) {
-                addEnemy2 = false;
-                enemies.add(new Enemy(this));
+        if (model.rocket.getScore() > 2000 && model.rocket.getScore() < 2999) {
+            if (model.addEnemy2) {
+                model.addEnemy2 = false;
+                model.enemies.add(new Enemy(this));
             }
         }
-        if (rocket.getScore() > 3000 && rocket.getScore() < 3999) {
-            if (addEnemy3) {
-                addEnemy3 = false;
-                enemies.add(new Enemy(this));
+        if (model.rocket.getScore() > 3000 && model.rocket.getScore() < 3999) {
+            if (model.addEnemy3) {
+                model.addEnemy3 = false;
+                model.enemies.add(new Enemy(this));
             }
         }
-        if (rocket.getScore() > 4000) {
-            if (addEnemy4) {
-                addEnemy4 = false;
-                enemies.add(new Enemy(this));
+        if (model.rocket.getScore() > 4000) {
+            if (model.addEnemy4) {
+                model.addEnemy4 = false;
+                model.enemies.add(new Enemy(this));
             }
         }
 
-        if (counter > 100) {
-            counter = 0;
+        if (model.counter > 100) {
+            model.counter = 0;
 
-            rocket.useFuel();
+            model.rocket.useFuel();
         }
 
-        if (rocket.getFuel() == 0) {
-            if (gameOver) {
+        if (model.rocket.getFuel() == 0) {
+            if (model.gameOver) {
                 this.GameOver();
-                gameOver = false;
+                model.gameOver = false;
             }
         }
 
     }
 
     private void GameOver() {
-        mp2.stop();
+        model.mp2.stop();
         // Gets the data repository in write mode
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_NAME, this.playerName);
-        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_SCORE, rocket.getScore());
+        values.put(FeedReaderContract.FeedEntry.COLUMN_NAME_SCORE, model.rocket.getScore());
 
         // Insert the new row, returning the primary key value of the new row
         if (db.insert(FeedReaderContract.FeedEntry.TABLE_NAME, null, values) < 0) {
@@ -166,9 +154,10 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         }
 
 
-        Intent intent = new Intent(getContext(), HighScore.class);
+        Intent intent = new Intent(getContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("playerName", playerName);
-        intent.putExtra("playerScore", rocket.getScore());
+        intent.putExtra("playerScore", model.rocket.getScore());
         getContext().startActivity(intent);
     }
 
@@ -177,14 +166,15 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh){
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         resolution = new Point(w, h);
-        super.onSizeChanged(w,h,oldw,oldh);
+        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
-    public void draw(Canvas canvas)  {
+    public void draw(Canvas canvas) {
         super.draw(canvas);
+
 
 
         // draw
@@ -193,21 +183,21 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         paint.setStyle(Paint.Style.FILL);
         canvas.drawPaint(paint);
 
-        paint.setColor(Color.BLACK);
+        paint.setColor(Color.WHITE);
         paint.setTextSize(25);
-        canvas.drawText("Player: " + playerName + ",Score:  " + rocket.getScore() + " ,Fuel: " + rocket.getFuel(), 10, 25, paint);
+        canvas.drawBitmap(mBackground, 0, 0, null); // pozadi
+        canvas.drawText("Player: " + playerName + ",Score:  " + model.rocket.getScore() + " ,Fuel: " + model.rocket.getFuel(), 10, 25, paint);
 
 
-        rocket.draw(canvas);
-        for (Enemy enemy : enemies) {
+        model.rocket.draw(canvas);
+        for (Enemy enemy : model.enemies) {
             enemy.draw(canvas);
         }
-        for (Fuel fuel : fuels) {
+        for (Fuel fuel : model.fuels) {
             fuel.draw(canvas);
         }
 
-        //enemy.draw(canvas);
-        //fuel.draw(canvas);
+        invalidate();
     }
 
     // Implements method of SurfaceHolder.Callback
@@ -217,20 +207,23 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
         this.gameThread = new GameThread(this, holder);
         this.gameThread.setRunning(true);
         this.gameThread.start();
-
-        counter = 0;
-        addEnemy1 = true;
-        addEnemy2 = true;
-        addEnemy3 = true;
-        addEnemy4 = true;
-
-        mp2.start();
-
-
-        rocket = new Rocket(this);
+        if (model.mp2 == null) {
+            model.mp2 = MediaPlayer.create(getContext(), R.raw.mcmc);
+        }
+        if (!model.mp2.isPlaying()) {
+            model.mp2.start();
+            model.mp2.setLooping(true);
+        }
+        if (model.rocket == null) {
+            model.rocket = new Rocket(this);
+        }
         //enemy = new Enemy(this);
-        enemies.add(new Enemy(this));
-        fuels.add(new Fuel(this));
+        if (model.enemies.size() == 0) {
+            model.enemies.add(new Enemy(this));
+        }
+        if (model.fuels.size() == 0) {
+            model.fuels.add(new Fuel(this));
+        }
         //fuel = new Fuel(this);
     }
 
@@ -244,13 +237,14 @@ public class GameSurface extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         boolean retry = true;
-        while(retry) {
+        while (retry) {
             try {
+                model.mp2.pause();
                 this.gameThread.setRunning(false);
 
                 // Parent thread must wait until the end of GameThread.
                 this.gameThread.join();
-            }catch(InterruptedException e)  {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             retry = false;
